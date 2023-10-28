@@ -1,7 +1,7 @@
 # chat-arxiv
 
 A QA chatbot to converse with Arxiv papers.
-
+![workflow png](https://github.com/sunilkumardash9/chat-arxiv/blob/main/Haystack.png)
 # Tech stack
 1. Haystack for building the QA pipeline
 2. Gradio for frontend
