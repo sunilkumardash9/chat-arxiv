@@ -15,43 +15,49 @@ DIR = "./arxiv"
 
 class ArxivComponent:
     """
-    This component retrieves the arxiv article for a given arxiv_id.
+    This component is responsible for retrieving arXiv articles based on an arXiv ID.
     """
-    def __init__(self) -> None:
-        ...
-        
+
     def run(self, arxiv_id: str = None):
         """
+        Retrieves and stores an arXiv article for the given arXiv ID.
+
         Args:
-            arxiv_id: Arxiv ID of the article to be retrieved.
+            arxiv_id (str): ArXiv ID of the article to be retrieved.
         """
+        # Set the directory path where arXiv articles will be stored
         dir: str = DIR
+
+        # Create an instance of the arXiv client
         arxiv_client = arxiv.Client()
+
+        # Check if an arXiv ID is provided; if not, raise an error
         if arxiv_id is None:
-            raise ValueError("Please provide the arxiv_id of the article to be retrieved.")
-        
-        
-        search = arxiv.Search(
-        id_list=[arxiv_id]  #"1605.08386v1"
-            )
+            raise ValueError("Please provide the arXiv ID of the article to be retrieved.")
+
+        # Search for the arXiv article using the provided arXiv ID
+        search = arxiv.Search(id_list=[arxiv_id])
         response = arxiv_client.results(search)
-        paper = next(response)
-        title = paper.title
+        paper = next(response)  # Get the first result
+        title = paper.title  # Extract the title of the article
+
+        # Check if the specified directory exists
         if os.path.isdir(dir):
-                if os.path.isfile(dir+"/"+title+".pdf"):
-                    return {"file_path":[dir+"/"+title+".pdf"]}
+            # Check if the PDF file for the article already exists
+            if os.path.isfile(dir + "/" + title + ".pdf"):
+                return {"file_path": [dir + "/" + title + ".pdf"]}
         else:
-                os.mkdir(dir)
-        # except:
-        #     raise arxiv.ArxivError(message=f"Error occured while searching \
-        #                            for arxiv article with id: {arxiv_id}")
+            # If the directory does not exist, create it
+            os.mkdir(dir)
+
+        # Attempt to download the PDF for the arXiv article
         try:
-            paper.download_pdf(dirpath=dir, filename=title+".pdf") 
-            return {"file_path":[dir+"/"+title+".pdf"]}
+            paper.download_pdf(dirpath=dir, filename=title + ".pdf")
+            return {"file_path": [dir + "/" + title + ".pdf"]}
         except:
-            raise arxiv.ArxivError(message=f"Error occured while downloading PDF \
-                                   for arxiv article with id: {arxiv_id}")
-        
+            # If there's an error during the download, raise a ConnectionError
+            raise ConnectionError(message=f"Error occurred while downloading PDF for \
+                                            arXiv article with ID: {arxiv_id}")   
 
 def indexing_pipeline(file_path: str = None):
     pdf_converter = PDFToTextConverter()
